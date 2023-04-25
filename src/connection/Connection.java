@@ -1,16 +1,16 @@
 package connection;
 
-public class Thread {
+public class Connection {
     static int connections = 0;
 
     private String socketAddress;
     private int socketPort;
 
-    public Thread(int port) {
+    public Connection(int port) {
         socketPort = port;
     }
     
-    public Thread(String address, int port) {
+    public Connection(String address, int port) {
         socketAddress = address;
         socketPort = port;
 

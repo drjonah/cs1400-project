@@ -8,12 +8,13 @@ import java.net.*;
  * THIS FILE IS THE PLAYER OR CLIENT
  */
 
-public class Client extends Thread {
-    private int clientId;
+public class Client extends Connection {
 
     private Socket clientSocket;
     private BufferedReader socketInput;
     private PrintWriter socketOutput;
+
+    private int clientId;
 
     public Client(String address, int port) {
         super(address, port);

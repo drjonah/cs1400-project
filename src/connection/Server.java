@@ -8,12 +8,10 @@ import java.net.*;
  * THIS FILE IS THE SERVER TO TALK TO THE DB
  */
 
-public class Server extends Thread {
+public class Server extends Connection {
 
     private Socket clientSocket;
     private ServerSocket server;
-    private BufferedReader socketInput;
-    private PrintWriter socketOutput;
 
     public Server(int socketPort) {
         super(socketPort);
@@ -23,13 +21,57 @@ public class Server extends Thread {
         // opening to the server
         try {
             server = new ServerSocket(super.getSocketPort());
+            // server = new ServerSocket();
             System.out.println("Server started...");
 
-            clientSocket = server.accept();
+            while (true) {
+                clientSocket = server.accept();
 
+                System.out.println("A client has connected...");
+
+                ClientHandler client = new ClientHandler(clientSocket);
+                client.start();
+            }
+        }
+        catch(IOException i) {
+            System.out.println("Unknown error has occured [" + i + "]");
+            return;
+        }
+    }
+
+    public boolean disconnect() {
+        // responsible for closing the server
+        try {
+            server.close();
+
+            return true;
+        }
+        catch (IOException i) {
+            System.out.println("Unknown error has occured [" + i + "]");
+            return false;
+        }
+    }
+}
+
+
+class ClientHandler extends Thread {
+
+    private Socket clientSocket;
+    private BufferedReader socketInput;
+    private PrintWriter socketOutput;
+
+    public ClientHandler(Socket cSocket) {
+        clientSocket = cSocket;
+        // start();
+    }
+
+    public void run() {
+        // opening to the server
+        try {
             socketInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             socketOutput = new PrintWriter(clientSocket.getOutputStream(), true);
 
+            // sending back to client
             while (true) {
                 try {
                     int connection = Integer.parseInt(socketInput.readLine());
@@ -38,7 +80,7 @@ public class Server extends Thread {
                     System.out.println("client " + connection + ": " + content);
                     
                     if (content.equals("quit")) {
-                        socketOutput.println("end");
+                        disconnect();
                         break;
                     }
 
@@ -50,8 +92,7 @@ public class Server extends Thread {
             }
 
         }
-        catch(IOException i)
-        {
+        catch(IOException i) {
             System.out.println("Unknown error has occured [" + i + "]");
             return;
         }
@@ -63,7 +104,6 @@ public class Server extends Thread {
             socketOutput.close();
             socketInput.close();
             clientSocket.close();
-            server.close();
 
             return true;
         }
