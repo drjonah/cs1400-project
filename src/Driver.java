@@ -24,40 +24,28 @@ public class Driver {
         if (input.equals("s")) {
             Server server = new Server(socketPort);
             server.connect();
-
-            if (server.disconnect())
-                System.out.println("Server closed...");
-            else
-                System.out.println("Served closing error..."); 
         }
 
         // server
         else if (input.equals("c")) {
-            String content, serverResponse;
+            String content;
 
-            Client client = new Client(socketAddress, socketPort);
+            System.out.print("name: ");
+            String name = scnr.nextLine();
 
-            if (client.getConnectionsTotal() <= 2) {
-                client.connect();
+            Client client = new Client(socketAddress, socketPort, name);
+            client.connect();
 
-                while (true) {
-                    System.out.print("> ");
-                    content = scnr.nextLine();
+            while (true) {
+                content = scnr.nextLine();
 
-                    serverResponse = client.send(content);
-                    if (serverResponse == null) {
-                        System.out.println("Goodbye...");
-
-                        if (client.disconnect())
-                            break;
-                    }
-
-                    System.out.println("server says: " + serverResponse);
-
+                if (content.equals("quit")) {
+                    if (client.disconnect())
+                        break;
                 }
+
+                client.send(content);
             }
-            else
-                System.out.println("Too many connections...");
         }
 
         scnr.close();

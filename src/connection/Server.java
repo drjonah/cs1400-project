@@ -1,8 +1,13 @@
 
 package connection;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.ArrayList;
 
 /*
  * THIS FILE IS THE SERVER TO TALK TO THE DB
@@ -10,8 +15,12 @@ import java.net.*;
 
 public class Server extends Connection {
 
+    private int connectedUsers = 0;
+
     private Socket clientSocket;
     private ServerSocket server;
+    private BufferedReader socketInput;
+    private PrintWriter socketOutput;
 
     public Server(int socketPort) {
         super(socketPort);
@@ -21,16 +30,29 @@ public class Server extends Connection {
         // opening to the server
         try {
             server = new ServerSocket(super.getSocketPort());
-            // server = new ServerSocket();
             System.out.println("Server started...");
 
             while (true) {
                 clientSocket = server.accept();
 
-                System.out.println("A client has connected...");
+                socketInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                socketOutput = new PrintWriter(clientSocket.getOutputStream(), true);
 
-                ClientHandler client = new ClientHandler(clientSocket);
-                client.start();
+                String clientName = socketInput.readLine();
+
+                if (connectedUsers < 2) {
+                    connectedUsers++;
+
+                    System.out.println("Client [" + clientName + "] has connected...");
+                    System.out.println("Total conncted clients: " + connectedUsers);
+
+                    ClientHandler client = new ClientHandler(clientSocket);
+                    client.start();
+                }
+                else {
+                    socketOutput.println("Cannot join server (possible max users)...");
+                    clientSocket.close();
+                }
             }
         }
         catch(IOException i) {
@@ -38,53 +60,40 @@ public class Server extends Connection {
             return;
         }
     }
-
-    public boolean disconnect() {
-        // responsible for closing the server
-        try {
-            server.close();
-
-            return true;
-        }
-        catch (IOException i) {
-            System.out.println("Unknown error has occured [" + i + "]");
-            return false;
-        }
-    }
 }
-
 
 class ClientHandler extends Thread {
 
+    static ArrayList<Socket> connectedClientScoket = new ArrayList<Socket>();
+
     private Socket clientSocket;
     private BufferedReader socketInput;
-    private PrintWriter socketOutput;
 
     public ClientHandler(Socket cSocket) {
         clientSocket = cSocket;
-        // start();
+        connectedClientScoket.add(cSocket);
     }
 
     public void run() {
         // opening to the server
         try {
             socketInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            socketOutput = new PrintWriter(clientSocket.getOutputStream(), true);
 
             // sending back to client
             while (true) {
                 try {
-                    int connection = Integer.parseInt(socketInput.readLine());
+                    String connection = socketInput.readLine();
                     String content = socketInput.readLine();
 
                     System.out.println("client " + connection + ": " + content);
-                    
-                    if (content.equals("quit")) {
-                        disconnect();
-                        break;
-                    }
 
-                    socketOutput.println(content);
+                    // sending to the other client
+                    for (Socket client: connectedClientScoket) {
+                        if (client != clientSocket) {
+                            PrintWriter socketOutput = new PrintWriter(client.getOutputStream(), true);
+                            socketOutput.println(connection + ": " + content);
+                        }
+                    }
                 }
                 catch(IOException i) {
                     System.out.println(i);
@@ -95,21 +104,6 @@ class ClientHandler extends Thread {
         catch(IOException i) {
             System.out.println("Unknown error has occured [" + i + "]");
             return;
-        }
-    }
-
-    public boolean disconnect() {
-        // responsible for closing the server
-        try {
-            socketOutput.close();
-            socketInput.close();
-            clientSocket.close();
-
-            return true;
-        }
-        catch (IOException i) {
-            System.out.println("Unknown error has occured [" + i + "]");
-            return false;
         }
     }
 }

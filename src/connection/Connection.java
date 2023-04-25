@@ -1,7 +1,6 @@
 package connection;
 
 public class Connection {
-    static int connections = 0;
 
     private String socketAddress;
     private int socketPort;
@@ -13,12 +12,6 @@ public class Connection {
     public Connection(String address, int port) {
         socketAddress = address;
         socketPort = port;
-
-        connections++;
-    }
-
-    public int getConnectionsTotal() {
-        return connections;
     }
 
     public String getSocketAddress() {

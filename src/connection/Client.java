@@ -1,8 +1,12 @@
 
 package connection;
 
-import java.io.*;
-import java.net.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 /*
  * THIS FILE IS THE PLAYER OR CLIENT
@@ -14,11 +18,11 @@ public class Client extends Connection {
     private BufferedReader socketInput;
     private PrintWriter socketOutput;
 
-    private int clientId;
+    private String clientName;
 
-    public Client(String address, int port) {
+    public Client(String address, int port, String name) {
         super(address, port);
-        clientId = super.getConnectionsTotal();
+        clientName = name;
     }
 
     public void connect() {
@@ -26,10 +30,38 @@ public class Client extends Connection {
         // responsible for opening the socket
         try {
             clientSocket = new Socket(super.getSocketAddress(), super.getSocketPort());
-            System.out.println("Socket connected...");
+            System.out.println("Connection to server successful...");
+            System.out.println("\n------------------------\n");
 
             socketInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); // reading input
             socketOutput = new PrintWriter(clientSocket.getOutputStream(), true); // sending responses
+
+            socketOutput.println(clientName);
+
+            // Start a new thread to handle incoming messages from the server
+            Thread receiveThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    while (true) {
+                        try {
+                            String serverResponse = socketInput.readLine();
+
+                            if (serverResponse == null) {
+                                System.out.println("Error with server, shutting down...");
+                                disconnect();
+                                break;
+                            }
+
+                            System.out.println(serverResponse);
+                        }
+                        catch (IOException i) {
+                            System.out.println("Error receiving message from server: " + i);
+                            break;
+                        }
+                    }
+                }
+            });
+            receiveThread.start();
         }
         catch (UnknownHostException u) {
             System.out.println("IP address not found [" + u + "]");
@@ -41,26 +73,12 @@ public class Client extends Connection {
         }
     }
 
-    public String send(String content) {
-        try {
-            socketOutput.println(clientId);
-            socketOutput.println(content);
-
-            String serverResponse = socketInput.readLine();
-
-            if (serverResponse.equals("bye"))
-                return null;
-
-            return serverResponse;
-        }
-        catch (IOException i) {
-            System.out.println("Unknown error has occured [" + i + "]");
-            return null;
-        }
+    public void send(String content) {
+        socketOutput.println(clientName);
+        socketOutput.println(content);
     }
 
     public boolean disconnect() {
-        // responsible for closing the sockets
         try {
             socketOutput.close();
             socketInput.close();
