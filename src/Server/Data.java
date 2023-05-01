@@ -1,15 +1,15 @@
-package connection;
+package Server;
 
-public class Connection {
+public class Data {
 
     private String socketAddress;
     private int socketPort;
 
-    public Connection(int port) {
+    public Data(int port) {
         socketPort = port;
     }
     
-    public Connection(String address, int port) {
+    public Data(String address, int port) {
         socketAddress = address;
         socketPort = port;
     }
