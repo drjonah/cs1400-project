@@ -1,5 +1,5 @@
 /*
- * THIS FILE IS JUST TO TES THE CLIENT AND SERVER
+ * THIS FILE IS JUST TO TEST THE PLAYER
  */
 
 public class Driver {

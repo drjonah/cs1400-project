@@ -1,4 +1,8 @@
 
+/*
+ * THIS FILE IS JUST TO TEST THE SERVER
+ */
+
 import Server.Server;
 
 public class SeverDriver {

@@ -1,4 +1,8 @@
 
+/*
+ * THIS FILE IS THE SERVER TO TALK TO THE DB
+ */
+
 package Server;
 
 import java.io.BufferedReader;
@@ -8,17 +12,12 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-/*
- * THIS FILE IS THE SERVER TO TALK TO THE DB
- */
-
 public class Server extends Data {
 
     private int connectedUsers = 0; // total connections
 
     private ServerSocket server; // the servers socket
     private Socket clientSocket; // client's socket that is attempting to connect
-    private BufferedReader socketInput; // client's input that is attempting to connect
     private PrintWriter socketOutput; // client's output that is attempting to connect
 
     public Server(int socketPort) {
@@ -34,7 +33,6 @@ public class Server extends Data {
             while (true) {
                 clientSocket = server.accept(); // accepts a client
 
-                socketInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream())); // connects to the clients input
                 socketOutput = new PrintWriter(clientSocket.getOutputStream(), true); // connects to the clients output
 
                 // ensures that there is only two players
@@ -101,9 +99,6 @@ class ClientHandler extends Thread {
                     Socket oppSocket = connectedClientSocket[connection%2];
                     PrintWriter socketOutput = new PrintWriter(oppSocket.getOutputStream(), true);
                     socketOutput.println(playerclientMove);
-                }
-                catch (NumberFormatException i) {
-                    System.out.println("Illegal number");
                 }
                 catch(IOException i) {
                     System.out.println(i);

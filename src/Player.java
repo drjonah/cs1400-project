@@ -1,5 +1,7 @@
 
-
+/*
+ * THIS FILE IS THE PLAYER OR CLIENT
+ */
 
 import java.util.Scanner;
 
@@ -11,10 +13,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
-/*
- * THIS FILE IS THE PLAYER OR CLIENT
- */
 
 public class Player extends Data {
 
@@ -58,7 +56,6 @@ public class Player extends Data {
                             if (isTurn) {
                                 System.out.print("Move: ");
                                 int move = scnr.nextInt();
-
                                 socketOutput.println(playerID);
                                 socketOutput.println(move);
 
