@@ -56,15 +56,25 @@ public class Player extends Data {
                             if (isTurn) {
                                 System.out.print("Move: ");
                                 int move = scnr.nextInt();
-                                socketOutput.println(playerID);
-                                socketOutput.println(move);
-
-                                isTurn = false;
+                                
+                                if (move < 0 || move > 8) {
+                                    System.out.println("Illegal board position, try again...");
+                                }
+                                else {
+                                    socketOutput.println(playerID);
+                                    socketOutput.println(move);
+    
+                                    isTurn = false;
+                                }
                             }
                             else {
                                 System.out.println("Waiting for opponent's move...");
                                 int oppMove = Integer.parseInt(socketInput.readLine());
-                                System.out.println("Opponent moved: " + oppMove);
+
+                                if (oppMove == -1) 
+                                    System.out.println("Second player not connected...");
+                                else
+                                    System.out.println("Opponent moved: " + oppMove);
 
                                 isTurn = true;
                             }

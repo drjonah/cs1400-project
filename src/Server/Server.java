@@ -95,10 +95,17 @@ class ClientHandler extends Thread {
 
                     System.out.println("Player " + connection + ": " + playerclientMove);
 
-                    // sending to the other client
-                    Socket oppSocket = connectedClientSocket[connection%2];
-                    PrintWriter socketOutput = new PrintWriter(oppSocket.getOutputStream(), true);
-                    socketOutput.println(playerclientMove);
+                    if (connectedClientSocket[connection%2] != null) {
+                        // sending to the other client
+                        Socket oppSocket = connectedClientSocket[connection%2];
+                        PrintWriter socketOutput = new PrintWriter(oppSocket.getOutputStream(), true);
+                        socketOutput.println(playerclientMove);
+                    }
+                    else {
+                        // second player not connected
+                        PrintWriter socketOutput = new PrintWriter(clientSocket.getOutputStream(), true);
+                        socketOutput.println(-1);
+                    }
                 }
                 catch(IOException i) {
                     System.out.println(i);
