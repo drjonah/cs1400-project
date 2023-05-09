@@ -71,7 +71,7 @@ public class Board {
       }
     }
 
-    System.out.println("It is " + turn + "'s turn, enter a number slot to place.");
+    System.out.println("It is " + turn + "'s turn, enter a number slot to place: ");
     return null;
 
   }
@@ -137,8 +137,7 @@ public class Board {
 
         if(!(numInput > 0 && numInput <= 9))
         {
-          System.out.println("Invalid input, please re-enter your slot number.");
-          continue;
+          throw new InputMismatchException();
         }
 
       } 
@@ -178,7 +177,7 @@ public class Board {
 
     else {
 
-      System.out.println("Congratulations! " + winner);
+      System.out.println("Congratulations! " + winner + ". Thanks for playing!");
 
     }
 
