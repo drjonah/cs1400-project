@@ -18,7 +18,7 @@ public class Player extends Data {
     private BufferedReader socketInput;
     private PrintWriter socketOutput;
 
-    Game game;
+    private Game game;
 
     private int playerID = 0;
     private boolean isTurn = false;
@@ -37,6 +37,10 @@ public class Player extends Data {
             socketOutput = new PrintWriter(clientSocket.getOutputStream(), true); // sending responses
             
             playerID = Integer.parseInt(socketInput.readLine()); // recieves name from connection
+            if (playerID == -1) {
+                System.out.println("Cannot join server (possible max users)...");
+                return;
+            }
 
             // player 1 turn
             if (playerID == 1)
@@ -57,16 +61,20 @@ public class Player extends Data {
                 @Override
                 public void run() {
                     while (true) {
-                        try {
-                            if (isTurn) {
-                                game.printBoard();   
-                                
+                        try {  
+                            // print game board         
+                            game.printBoard();  
+                            // checks to see if it is players turn
+                            if (isTurn) { 
+                                // ask for player moves
                                 int position = game.move();
                                 game.update(position, isTurn);
 
+                                // sends move to the server
                                 socketOutput.println(playerID);
                                 socketOutput.println(position);
 
+                                // checks to see if a condition has been flagged
                                 boolean isWon = game.checkWinner();
                                 boolean isDraw = game.checkDraw();
 
@@ -82,19 +90,24 @@ public class Player extends Data {
                                     break;
                                 }
 
+                                // switches turns
                                 isTurn = false;
                             }
                             else {
+                                // takes 
                                 System.out.println("Waiting for opponent's move...");
                                 int oppPosition = Integer.parseInt(socketInput.readLine());
-                                game.update(oppPosition, isTurn);
-
-                                if (oppPosition == -1) 
-                                    System.out.println("Second player not connected...");
+                                // checks to see if the server sent -1 (indicates only 1 player is conected) / clears board if true
+                                if (oppPosition == -1) {
+                                    System.out.println("Player 2 is not connected...");
+                                    game.clearBoard();
+                                }
                                 else {
                                     // opponent has recieved the move, prints the board, and checks if the move added completes the game
+                                    game.update(oppPosition, isTurn);
                                     System.out.println("Opponent moved: " + oppPosition);
                                 
+                                    // checks to see if a condition has been flagged
                                     boolean isWon = game.checkWinner();
                                     boolean isDraw = game.checkDraw();
 
@@ -111,6 +124,7 @@ public class Player extends Data {
                                     }
                                 }
 
+                                // switches turns
                                 isTurn = true;
                             }
 
@@ -136,17 +150,14 @@ public class Player extends Data {
         }
     }
 
-    public boolean disconnect() {
+    public void disconnect() {
         try {
             socketOutput.close();
             socketInput.close();
             clientSocket.close();
-
-            return true;
         }
         catch (IOException i) {
             System.out.println("Unknown error has occured [" + i + "]");
-            return false;
         }
     }
 }

@@ -119,4 +119,9 @@ public class Game {
 		System.out.printf("||-------||-------||-------||%n");
 	}
 
+    public void clearBoard() {
+        for (int i = 0; i < board.length; i++)
+            board[i] = "-";
+    }
+
 }

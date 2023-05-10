@@ -47,12 +47,12 @@ public class Server extends Data {
                     System.out.println("Total conncted clients: " + connectedUsers);
 
                     // allows the client to continue the connection
-                    ClientHandler client = new ClientHandler(clientSocket, playerName);
+                    ClientHandler client = new ClientHandler(clientSocket, this, playerName);
                     client.start();
                 }
                 else {
                     // sends a message back to the user and terminates their connection
-                    socketOutput.println("Cannot join server (possible max users)...");
+                    socketOutput.println(-1);
                     clientSocket.close();
                 }
             }
@@ -61,6 +61,10 @@ public class Server extends Data {
             System.out.println("Unknown error has occured [" + i + "]");
             return;
         }
+    }
+
+    public void disconnectPlayer() {
+        connectedUsers -= 1;
     }
 }
 
@@ -73,12 +77,17 @@ class ClientHandler extends Thread {
     // static ArrayList<Socket> connectedClientScoket = new ArrayList<Socket>(); // array of all connected clients (players/users)
     static Socket[] connectedClientSocket = new Socket[2];
 
+    private Server connectedServer;
     private Socket clientSocket; // individual client
     private BufferedReader socketInput; // individual client input
 
-    public ClientHandler(Socket cSocket, int playerName) {
+    private int playerName;
+
+    public ClientHandler(Socket cSocket, Server server, int pName) {
         clientSocket = cSocket;
-        connectedClientSocket[playerName - 1] = cSocket;
+        connectedServer = server;
+        connectedClientSocket[pName - 1] = cSocket;
+        playerName = pName;
     }
 
     public void run() {
@@ -90,21 +99,33 @@ class ClientHandler extends Thread {
             while (true) {
                 try {
                     // reads data sent to the server 
-                    int connection = Integer.parseInt(socketInput.readLine()); 
-                    int playerclientMove = Integer.parseInt(socketInput.readLine());
+                    String connection_string = socketInput.readLine();
+                    String move_string = socketInput.readLine();
+                    
+                    if (connection_string != null && move_string != null) {
+                        int connection = Integer.parseInt(connection_string); 
+                        int playerclientMove = Integer.parseInt(move_string);
 
-                    System.out.println("Player " + connection + ": " + playerclientMove);
+                        System.out.println("Player " + connection + ": " + playerclientMove);
 
-                    if (connectedClientSocket[connection%2] != null) {
-                        // sending to the other client
-                        Socket oppSocket = connectedClientSocket[connection%2];
-                        PrintWriter socketOutput = new PrintWriter(oppSocket.getOutputStream(), true);
-                        socketOutput.println(playerclientMove);
+                        if (connectedClientSocket[connection%2] != null) {
+                            // sending to the other client
+                            Socket oppSocket = connectedClientSocket[connection%2];
+                            PrintWriter socketOutput = new PrintWriter(oppSocket.getOutputStream(), true);
+                            socketOutput.println(playerclientMove);
+                        }
+                        else {
+                            // second player not connected
+                            PrintWriter socketOutput = new PrintWriter(clientSocket.getOutputStream(), true);
+                            socketOutput.println(-1);
+                        }
                     }
                     else {
-                        // second player not connected
-                        PrintWriter socketOutput = new PrintWriter(clientSocket.getOutputStream(), true);
-                        socketOutput.println(-1);
+                        // this part occurs when the player is finished with the game = disconnects, removes socket, and decrements connected players
+                        System.out.println("Player " + playerName + " has disconnected.");
+                        connectedClientSocket[playerName - 1] = null;
+                        connectedServer.disconnectPlayer();
+                        break;
                     }
                 }
                 catch(IOException i) {
