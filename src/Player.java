@@ -4,6 +4,7 @@
  */
 
 import Server.Data;
+import database.Database;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,7 +52,6 @@ public class Player extends Data {
             System.out.println("+------------------------+");
             System.out.println();
             System.out.println("You are player " + playerID);
-
             System.out.println("X will play first.");
 
             game = new Game(playerID);
@@ -67,6 +67,7 @@ public class Player extends Data {
                             // checks to see if it is players turn
                             if (isTurn) { 
                                 // ask for player moves
+                                game.incrementNumberTurns();
                                 int position = game.move();
                                 game.update(position, isTurn);
 
@@ -80,6 +81,8 @@ public class Player extends Data {
 
                                 if(isWon == true) {
                                     System.out.println("YOU WIN!");
+                                    // increments win in databse
+                                    Database.insertStatsToDB(game.getUserPiece());
                                     disconnect();
                                     break;
                                 }
@@ -100,10 +103,12 @@ public class Player extends Data {
                                 // checks to see if the server sent -1 (indicates only 1 player is conected) / clears board if true
                                 if (oppPosition == -1) {
                                     System.out.println("Player 2 is not connected...");
+                                    Database.resetGame();
                                     game.clearBoard();
                                 }
                                 else {
                                     // opponent has recieved the move, prints the board, and checks if the move added completes the game
+                                    game.incrementNumberTurns();
                                     game.update(oppPosition, isTurn);
                                     System.out.println("Opponent moved: " + oppPosition);
                                 

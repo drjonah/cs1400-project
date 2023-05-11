@@ -1,11 +1,13 @@
 import java.util.*;
-// import java.io.*;
+
+import database.Database;
 
 public class Game {
-	
+
 	private Scanner scnr = new Scanner(System.in);
 	private String board[] = {"-", "-", "-", "-", "-", "-", "-", "-", "-"};
     private String userPiece, oppPiece;
+    private int numberTurns = 0;
 
 	public Game(int playerID) {
 
@@ -52,10 +54,16 @@ public class Game {
 			}
 			// X WINNER
 			if(line.equals("XXX")) {
+                printBoard();
+				// resets game database
+				Database.resetGame();
 				return true;
 			}
 			// O WINNER
 			else if(line.equals("OOO")) {
+                printBoard();
+				// resets game database
+				Database.resetGame();
 				return true;
 			}
 		}
@@ -68,6 +76,9 @@ public class Game {
                 return false;
             }
         }
+		printBoard();
+		// reset game database
+		Database.resetGame();
         return true;
     }
 
@@ -83,6 +94,7 @@ public class Game {
 				if(!(numInput > 0 && numInput <= 9) || board[numInput-1].equalsIgnoreCase("X") || board[numInput-1].equalsIgnoreCase("O") ) {
 					throw new InputMismatchException();
 				}
+                Database.insertPlayerToDB(numberTurns, userPiece, numInput);
 				break;
 			} 
 			catch (InputMismatchException ime) {
@@ -123,5 +135,13 @@ public class Game {
         for (int i = 0; i < board.length; i++)
             board[i] = "-";
     }
+
+    public void incrementNumberTurns() {
+        numberTurns += 1;
+    }
+
+	public String getUserPiece() {
+		return userPiece;
+	}
 
 }
