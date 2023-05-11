@@ -1,6 +1,6 @@
-import jdbc.AppPlayers;
-
 import java.util.*;
+
+import database.Database;
 
 public class Game {
 
@@ -56,14 +56,14 @@ public class Game {
 			if(line.equals("XXX")) {
                 printBoard();
 				// resets game database
-				AppPlayers.resetGame();
+				Database.resetGame();
 				return true;
 			}
 			// O WINNER
 			else if(line.equals("OOO")) {
                 printBoard();
 				// resets game database
-				AppPlayers.resetGame();
+				Database.resetGame();
 				return true;
 			}
 		}
@@ -78,7 +78,7 @@ public class Game {
         }
 		printBoard();
 		// reset game database
-		AppPlayers.resetGame();
+		Database.resetGame();
         return true;
     }
 
@@ -94,7 +94,7 @@ public class Game {
 				if(!(numInput > 0 && numInput <= 9) || board[numInput-1].equalsIgnoreCase("X") || board[numInput-1].equalsIgnoreCase("O") ) {
 					throw new InputMismatchException();
 				}
-                AppPlayers.insertPlayerToDB(numberTurns, userPiece, numInput);
+                Database.insertPlayerToDB(numberTurns, userPiece, numInput);
 				break;
 			} 
 			catch (InputMismatchException ime) {

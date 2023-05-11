@@ -4,7 +4,7 @@
  */
 
 import Server.Data;
-import jdbc.AppPlayers;
+import database.Database;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -82,7 +82,7 @@ public class Player extends Data {
                                 if(isWon == true) {
                                     System.out.println("YOU WIN!");
                                     // increments win in databse
-                                    AppPlayers.insertStatsToDB(game.getUserPiece());
+                                    Database.insertStatsToDB(game.getUserPiece());
                                     disconnect();
                                     break;
                                 }
@@ -103,6 +103,7 @@ public class Player extends Data {
                                 // checks to see if the server sent -1 (indicates only 1 player is conected) / clears board if true
                                 if (oppPosition == -1) {
                                     System.out.println("Player 2 is not connected...");
+                                    Database.resetGame();
                                     game.clearBoard();
                                 }
                                 else {

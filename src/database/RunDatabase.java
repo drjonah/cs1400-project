@@ -1,9 +1,9 @@
-package jdbc;
+package database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 
-public class App 
+public class RunDatabase 
 {
     static Connection con;
 
