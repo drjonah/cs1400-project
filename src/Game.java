@@ -3,8 +3,6 @@ import jdbc.AppPlayers;
 import java.util.*;
 
 public class Game {
-	
-    private AppPlayers serverAccess;
 
 	private Scanner scnr = new Scanner(System.in);
 	private String board[] = {"-", "-", "-", "-", "-", "-", "-", "-", "-"};
@@ -56,14 +54,16 @@ public class Game {
 			}
 			// X WINNER
 			if(line.equals("XXX")) {
-                serverAccess.insertStatsToDB("X");
-                serverAccess.resetGame();
+                printBoard();
+				// resets game database
+				AppPlayers.resetGame();
 				return true;
 			}
 			// O WINNER
 			else if(line.equals("OOO")) {
-                serverAccess.insertStatsToDB("O");
-                serverAccess.resetGame();
+                printBoard();
+				// resets game database
+				AppPlayers.resetGame();
 				return true;
 			}
 		}
@@ -76,6 +76,9 @@ public class Game {
                 return false;
             }
         }
+		printBoard();
+		// reset game database
+		AppPlayers.resetGame();
         return true;
     }
 
@@ -91,7 +94,7 @@ public class Game {
 				if(!(numInput > 0 && numInput <= 9) || board[numInput-1].equalsIgnoreCase("X") || board[numInput-1].equalsIgnoreCase("O") ) {
 					throw new InputMismatchException();
 				}
-                serverAccess.insertPlayerToDB(numberTurns, userPiece, numInput);
+                AppPlayers.insertPlayerToDB(numberTurns, userPiece, numInput);
 				break;
 			} 
 			catch (InputMismatchException ime) {
@@ -136,5 +139,9 @@ public class Game {
     public void incrementNumberTurns() {
         numberTurns += 1;
     }
+
+	public String getUserPiece() {
+		return userPiece;
+	}
 
 }

@@ -3,7 +3,7 @@
  * THIS FILE IS THE SERVER TO TALK TO THE DB
  */
 
-package server;
+package Server;
 
 import java.io.BufferedReader;
 import java.io.IOException;
