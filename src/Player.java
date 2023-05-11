@@ -3,8 +3,6 @@
  * THIS FILE IS THE PLAYER OR CLIENT
  */
 
-import java.util.Scanner;
-
 import Server.Data;
 
 import java.io.BufferedReader;
@@ -20,10 +18,10 @@ public class Player extends Data {
     private BufferedReader socketInput;
     private PrintWriter socketOutput;
 
+    private Game game;
+
     private int playerID = 0;
     private boolean isTurn = false;
-
-    private Scanner scnr = new Scanner(System.in);
 
     public Player(String address, int port) {
         super(address, port);
@@ -39,43 +37,94 @@ public class Player extends Data {
             socketOutput = new PrintWriter(clientSocket.getOutputStream(), true); // sending responses
             
             playerID = Integer.parseInt(socketInput.readLine()); // recieves name from connection
-
-            System.out.println("Welcome to Tic-Tac-Toe!");
-            System.out.println("You are player " + playerID);
+            if (playerID == -1) {
+                System.out.println("Cannot join server (possible max users)...");
+                return;
+            }
 
             // player 1 turn
             if (playerID == 1)
                 isTurn = true;
+
+            System.out.println("+------------------------+");
+            System.out.println("| Welcome to TIC TAC TOE |");
+            System.out.println("+------------------------+");
+            System.out.println();
+            System.out.println("You are player " + playerID);
+
+            System.out.println("X will play first.");
+
+            game = new Game(playerID);
 
             // Game Loop
             Thread receiveThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     while (true) {
-                        try {
-                            if (isTurn) {
-                                System.out.print("Move: ");
-                                int move = scnr.nextInt();
-                                
-                                if (move < 0 || move > 8) {
-                                    System.out.println("Illegal board position, try again...");
+                        try {  
+                            // print game board         
+                            game.printBoard();  
+                            // checks to see if it is players turn
+                            if (isTurn) { 
+                                // ask for player moves
+                                int position = game.move();
+                                game.update(position, isTurn);
+
+                                // sends move to the server
+                                socketOutput.println(playerID);
+                                socketOutput.println(position);
+
+                                // checks to see if a condition has been flagged
+                                boolean isWon = game.checkWinner();
+                                boolean isDraw = game.checkDraw();
+
+                                if(isWon == true) {
+                                    System.out.println("YOU WIN!");
+                                    disconnect();
+                                    break;
                                 }
-                                else {
-                                    socketOutput.println(playerID);
-                                    socketOutput.println(move);
-    
-                                    isTurn = false;
+
+                                if(isDraw == true) {
+                                    System.out.println("YOU TIED!");
+                                    disconnect();
+                                    break;
                                 }
+
+                                // switches turns
+                                isTurn = false;
                             }
                             else {
+                                // takes 
                                 System.out.println("Waiting for opponent's move...");
-                                int oppMove = Integer.parseInt(socketInput.readLine());
+                                int oppPosition = Integer.parseInt(socketInput.readLine());
+                                // checks to see if the server sent -1 (indicates only 1 player is conected) / clears board if true
+                                if (oppPosition == -1) {
+                                    System.out.println("Player 2 is not connected...");
+                                    game.clearBoard();
+                                }
+                                else {
+                                    // opponent has recieved the move, prints the board, and checks if the move added completes the game
+                                    game.update(oppPosition, isTurn);
+                                    System.out.println("Opponent moved: " + oppPosition);
+                                
+                                    // checks to see if a condition has been flagged
+                                    boolean isWon = game.checkWinner();
+                                    boolean isDraw = game.checkDraw();
 
-                                if (oppMove == -1) 
-                                    System.out.println("Second player not connected...");
-                                else
-                                    System.out.println("Opponent moved: " + oppMove);
+                                    if(isWon == true) {
+                                        System.out.println("YOU LOST!");
+                                        disconnect();
+                                        break;
+                                    }
 
+                                    if(isDraw == true) {
+                                        System.out.println("YOU TIED!");
+                                        disconnect();
+                                        break;
+                                    }
+                                }
+
+                                // switches turns
                                 isTurn = true;
                             }
 
@@ -101,17 +150,14 @@ public class Player extends Data {
         }
     }
 
-    public boolean disconnect() {
+    public void disconnect() {
         try {
             socketOutput.close();
             socketInput.close();
             clientSocket.close();
-
-            return true;
         }
         catch (IOException i) {
             System.out.println("Unknown error has occured [" + i + "]");
-            return false;
         }
     }
 }
