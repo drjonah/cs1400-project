@@ -5,7 +5,7 @@
 public class Driver {
     public static void main(String[] args) {
         String socketAddress = "127.0.0.1";
-        int socketPort = 6666;
+        int socketPort = 7777;
 
         System.out.println("*** Welcome to Client Driver ***");
 

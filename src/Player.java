@@ -3,7 +3,7 @@
  * THIS FILE IS THE PLAYER OR CLIENT
  */
 
-import Server.Data;
+import server.Data;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -69,6 +69,7 @@ public class Player extends Data {
                                 // ask for player moves
                                 int position = game.move();
                                 game.update(position, isTurn);
+                                game.incrementNumberTurns();
 
                                 // sends move to the server
                                 socketOutput.println(playerID);
@@ -105,6 +106,7 @@ public class Player extends Data {
                                 else {
                                     // opponent has recieved the move, prints the board, and checks if the move added completes the game
                                     game.update(oppPosition, isTurn);
+                                    game.incrementNumberTurns();
                                     System.out.println("Opponent moved: " + oppPosition);
                                 
                                     // checks to see if a condition has been flagged

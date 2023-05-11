@@ -1,11 +1,15 @@
+import jdbc.AppPlayers;
+
 import java.util.*;
-// import java.io.*;
 
 public class Game {
 	
+    private AppPlayers serverAccess;
+
 	private Scanner scnr = new Scanner(System.in);
 	private String board[] = {"-", "-", "-", "-", "-", "-", "-", "-", "-"};
     private String userPiece, oppPiece;
+    private int numberTurns = 0;
 
 	public Game(int playerID) {
 
@@ -52,10 +56,14 @@ public class Game {
 			}
 			// X WINNER
 			if(line.equals("XXX")) {
+                serverAccess.insertStatsToDB("X");
+                serverAccess.resetGame();
 				return true;
 			}
 			// O WINNER
 			else if(line.equals("OOO")) {
+                serverAccess.insertStatsToDB("O");
+                serverAccess.resetGame();
 				return true;
 			}
 		}
@@ -83,6 +91,7 @@ public class Game {
 				if(!(numInput > 0 && numInput <= 9) || board[numInput-1].equalsIgnoreCase("X") || board[numInput-1].equalsIgnoreCase("O") ) {
 					throw new InputMismatchException();
 				}
+                serverAccess.insertPlayerToDB(numberTurns, userPiece, numInput);
 				break;
 			} 
 			catch (InputMismatchException ime) {
@@ -122,6 +131,10 @@ public class Game {
     public void clearBoard() {
         for (int i = 0; i < board.length; i++)
             board[i] = "-";
+    }
+
+    public void incrementNumberTurns() {
+        numberTurns += 1;
     }
 
 }
