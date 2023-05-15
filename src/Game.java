@@ -83,21 +83,24 @@ public class Game {
     }
 
 	public int move() {
+		String in;
 		int numInput;
 
 		while (true) {
+
+			System.out.print("Enter a number to input: ");
+			in = scnr.next();
 		
 			try {
-				System.out.print("Enter a number to input: ");
-                numInput = scnr.nextInt();
+				numInput = Integer.parseInt(in);
 				// move on board || move occupied
 				if(!(numInput > 0 && numInput <= 9) || board[numInput-1].equalsIgnoreCase("X") || board[numInput-1].equalsIgnoreCase("O") ) {
-					throw new InputMismatchException();
+					throw new NumberFormatException();
 				}
                 Database.insertPlayerToDB(numberTurns, userPiece, numInput);
 				break;
 			} 
-			catch (InputMismatchException ime) {
+			catch (NumberFormatException e) {
 				System.out.println("Invalid input, please re-enter your slot number.");
 				continue;
 			}
