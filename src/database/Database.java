@@ -27,7 +27,7 @@ public class Database {
     public static void insertStatsToDB(String playerPiece) {
         try {
             Connection con = RunDatabase.createC(); //establishes connection to MySQL
-            String insertStats = "insert into stats(playerID, wins) values(?,0) on duplicate key update wins = wins + 1"; //inputs command to MySQL which stores information into a stats table in the database
+            String insertStats = "insert into stats(playerID, wins) values(?,1) on duplicate key update wins = wins + 1"; //inputs command to MySQL which stores information into a stats table in the database
             PreparedStatement pstmt = con.prepareStatement(insertStats); //makes it so that you can execute the SQL statement multiple times
             pstmt.setString(1, playerPiece); //setting the playerPiece that won; basically used to store in the correct column
             
